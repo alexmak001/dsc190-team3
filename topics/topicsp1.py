@@ -27,6 +27,7 @@ class topicsp1(Node):
         self.laser_front = 0    # distance to front
         self.laser_right_min = 0    # min distnace to right
         self.laser_right_max = 0  # max distance to right
+        self.laser_left_min = 0 # min distance to left
 
         # create a Twist message
         self.cmd = Twist()
@@ -46,24 +47,23 @@ class topicsp1(Node):
 
     def motion(self):
         # print the data
-        self.get_logger().info("Laser Front: {0} \n Laser Right: {1} \n Laser Left: {2} \n Linear.X {3}".format(
-            self.laser_front, self.laser_right_min, self.laser_right_max, self.cmd.linear.x))
+        self.get_logger().info("Laser Left Min: {0} \n Linear.X {1} \n Linear.Z = {2}".format(
+            self.laser_left_min, self.cmd.linear.x, self.cmd.angular.z))
         # Logic of move
         
         self.cmd.linear.x = 0.6
         
-        if self.laser_front < 0.2:
-            self.cmd.linear.x = 0.0
-        
-        elif self.laser_left_min > 0.28: #far from wall
+        if self.laser_left_min < 0.22: # too close to left wall
+            self.cmd.linear.x = 0.5
             self.cmd.angular.z = 0.1
-            
-        elif self.laser_left_min < 0.22 #close to wall
+
+        elif self.laser_left_min > 0.28: #far from wall left wall
+            self.cmd.linear.x = 0.6
             self.cmd.angular.z = -0.1
             
-        else:
-            self.cmd.angular.z = 0.0
-        
+        else: # perfect
+            self.cmd.linear.x = 0.7
+            self.cmd.angular.z = 0
 
         # Publishing the cmd_vel values to topipc
         self.publisher_.publish(self.cmd)
