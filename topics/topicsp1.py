@@ -36,12 +36,21 @@ class topicsp1(Node):
 
         # Save the right laser scan info front
         # front laser scan, find closest item
-        self.laser_front = min(msg.ranges[170:190])
+        self.laser_front_min = min(msg.ranges[170:190])
 
         # min distnace to right laser scan
-        self.laser_right_min = min(msg.ranges[70:110])
+        self.laser_right_min = min(msg.ranges[135:137])
+
         # max distance to right
-        self.laser_right_max = max(msg.ranges[70:110])
+        self.laser_right_max = max(msg.ranges[135:137])
+
+
+        # min distnace to right laser scan
+        self.laser_left_min = min(msg.ranges[675:677])
+
+        # max distance to right
+        self.laser_left_max = max(msg.ranges[675:677])
+
 
     def motion(self):
         # print the data
@@ -49,10 +58,7 @@ class topicsp1(Node):
             self.laser_front, self.laser_right_min, self.laser_right_max, self.cmd.linear.x))
         # Logic of move
 
-        if self.laser_front < 0.5:  # incoming corner
-            self.cmd.linear.x = 0.09
-            self.cmd.angular.z = 0.4
-        elif self.laser_front < 0.2:  # front too close to wall
+        if self.laser_front < 0.2:  # front too close to wall
             self.cmd.linear.x = 0.05
             self.cmd.angular.z = 1
         elif self.laser_right_max > 0.3:  # far from wall
