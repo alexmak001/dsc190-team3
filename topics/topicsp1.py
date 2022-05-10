@@ -22,7 +22,7 @@ class topicsp1(Node):
         # prevent unused variable warning
         # self.subscriber
         # define the timer period for 0.5 seconds
-        self.timer_period = 0.5
+        self.timer_period = 0.02
         # define the variable to save the received info
         self.laser_front = 0    # distance to front
         self.laser_right_min = 0    # min distnace to right
@@ -36,40 +36,34 @@ class topicsp1(Node):
 
         # Save the right laser scan info front
         # front laser scan, find closest item
-        self.laser_front_min = min(msg.ranges[170:190])
+        self.laser_front_min = min(msg.ranges[405:408]) #not rlly needed, three degrees front
 
-        # min distnace to right laser scan
-        self.laser_right_min = min(msg.ranges[135:137])
+        # min distance to right and left laser scan
+        self.laser_right_min = min(msg.ranges[132:141]) #range of three degrees on right
+        self.laser_left_min = min(msg.ranges[672:681]) #range of three degrees on left
 
-        # max distance to right
-        self.laser_right_max = max(msg.ranges[135:137])
-
-
-        # min distnace to right laser scan
-        self.laser_left_min = min(msg.ranges[675:677])
-
-        # max distance to right
-        self.laser_left_max = max(msg.ranges[675:677])
 
 
     def motion(self):
         # print the data
-        self.get_logger().info("Laser Front: {0} \n Laser Right Min: {1} \n Laser Right Max: {2} \n Linear.X {3}".format(
+        self.get_logger().info("Laser Front: {0} \n Laser Right: {1} \n Laser Left: {2} \n Linear.X {3}".format(
             self.laser_front, self.laser_right_min, self.laser_right_max, self.cmd.linear.x))
         # Logic of move
-
-        if self.laser_front < 0.2:  # front too close to wall
-            self.cmd.linear.x = 0.05
-            self.cmd.angular.z = 1
-        elif self.laser_right_max > 0.3:  # far from wall
-            self.cmd.linear.x = 0.1
-            self.cmd.angular.z = -0.1
-        elif self.laser_right_min < 0.2:  # too close to wall
-            self.cmd.linear.x = 0.06
+        
+        self.cmd.linear.x = 0.6
+        
+        if self.laser_front < 0.2:
+            self.cmd.linear.x = 0.0
+        
+        elif self.laser_left_min > 0.28: #far from wall
             self.cmd.angular.z = 0.1
-        else:  # perfect place
-            self.cmd.linear.x = 0.11
+            
+        elif self.laser_left_min < 0.22 #close to wall
+            self.cmd.angular.z = -0.1
+            
+        else:
             self.cmd.angular.z = 0.0
+        
 
         # Publishing the cmd_vel values to topipc
         self.publisher_.publish(self.cmd)
