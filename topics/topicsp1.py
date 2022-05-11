@@ -28,13 +28,14 @@ class topicsp1(Node):
         self.laser_right_min = 0    # min distnace to right
         self.laser_right_max = 0  # max distance to right
         self.laser_left_min = 0 # min distance to left
+        self.laser_test = 0
 
         # create a Twist message
         self.cmd = Twist()
         self.timer = self.create_timer(self.timer_period, self.motion)
 
     def move_turtlebot(self, msg):
-
+        self.laser_test = mean(msg.ranges)
         # Save the right laser scan info front
         # front laser scan, find closest item
         self.laser_front_min = min(msg.ranges[405:408]) #not rlly needed, three degrees front
@@ -50,9 +51,9 @@ class topicsp1(Node):
         self.get_logger().info("Laser Left Min: {0} \n Linear.X {1} \n Linear.Z = {2}".format(
             self.laser_left_min, self.cmd.linear.x, self.cmd.angular.z))
         # Logic of move
-        
+
         self.cmd.linear.x = 0.6
-        
+
         if self.laser_left_min < 0.22: # too close to left wall
             self.cmd.linear.x = 0.5
             self.cmd.angular.z = 0.1
@@ -60,10 +61,10 @@ class topicsp1(Node):
         elif self.laser_left_min > 0.28: #far from wall left wall
             self.cmd.linear.x = 0.6
             self.cmd.angular.z = -0.1
-            
+
         else: # perfect
             self.cmd.linear.x = 0.7
-            self.cmd.angular.z = 0
+            self.cmd.angular.z = 0.0
 
         # Publishing the cmd_vel values to topipc
         self.publisher_.publish(self.cmd)
