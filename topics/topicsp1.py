@@ -50,15 +50,13 @@ class topicsp1(Node):
             self.laser_left_min, self.cmd.linear.x, self.cmd.angular.z))
         # Logic of move
 
-        self.cmd.linear.x = 0.6
-
         if self.laser_left_min < 0.22: # too close to left wall
             self.cmd.linear.x = 0.5
-            self.cmd.angular.z = 0.1
+            self.cmd.angular.z = 0.5
 
         elif self.laser_left_min > 0.28: #far from wall left wall
-            self.cmd.linear.x = 0.6
-            self.cmd.angular.z = -0.1
+            self.cmd.linear.x = 0.5
+            self.cmd.angular.z = -0.5
 
         else: # perfect
             self.cmd.linear.x = 0.7
