@@ -50,16 +50,16 @@ class topicsp1(Node):
             self.laser_left_min, self.cmd.linear.x, self.cmd.angular.z))
         # Logic of move
 
-        calibration = 0.3
+        calibration = 0.32
 
         self.cmd.angular.z = calibration
 
-        if self.laser_left_min < 0.22: # too close to left wall
+        if self.laser_left_min < 0.45: # too close to left wall
             self.cmd.linear.x = 0.5
-            self.cmd.angular.z = 0.3+ calibration
-        elif self.laser_left_min > 0.28: #far from wall left wall
+            self.cmd.angular.z = 0.3 + calibration
+        elif self.laser_left_min > 0.60: #far from wall left wall
             self.cmd.linear.x = 0.5
-            self.cmd.angular.z = -0.1 + calibration
+            self.cmd.angular.z = -0.3 + calibration
         else: # perfect
             self.cmd.linear.x = 0.5
 
