@@ -52,15 +52,15 @@ class topicsp1(Node):
 
         if self.laser_left_min < 0.22: # too close to left wall
             self.cmd.linear.x = 0.5
-            self.cmd.angular.z = 0.0
+            self.cmd.angular.z = 0.1
 
         elif self.laser_left_min > 0.28: #far from wall left wall
             self.cmd.linear.x = 0.5
-            self.cmd.angular.z = -0.0
+            self.cmd.angular.z = 0.1
 
         else: # perfect
             self.cmd.linear.x = 0.7
-            self.cmd.angular.z = 0.0
+            self.cmd.angular.z = 0.1
 
         # Publishing the cmd_vel values to topipc
         self.publisher_.publish(self.cmd)
