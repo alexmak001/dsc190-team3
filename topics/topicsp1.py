@@ -36,7 +36,7 @@ class topicsp1(Node):
     def move_turtlebot(self, msg):
         # Save the right laser scan info front
         # front laser scan, find closest item
-        self.laser_front_min = min(msg.ranges[405:408]) #not rlly needed, three degrees front
+        self.laser_front = min(msg.ranges[405:408]) #not rlly needed, three degrees front
 
         # min distance to right and left laser scan
         self.laser_right_min = min(msg.ranges[132:141]) #range of three degrees on right
@@ -52,7 +52,7 @@ class topicsp1(Node):
 
         calibration = 0.32
 
-        if self.laser_front_min < 0.3:
+        if self.laser_front < 0.3:
             self.cmd.linear.x = 0.3
             self.cmd.angular.z = 0.5 + calibration
         if self.laser_left_min < 0.45: # too close to left wall
