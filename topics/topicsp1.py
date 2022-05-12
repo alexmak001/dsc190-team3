@@ -55,13 +55,13 @@ class topicsp1(Node):
         self.cmd.angular.z = calibration
 
         if self.laser_left_min < 0.45: # too close to left wall
-            self.cmd.linear.x = 0.5
+            self.cmd.linear.x = 0.4
             self.cmd.angular.z = 0.3 + calibration
         elif self.laser_left_min > 0.60: #far from wall left wall
-            self.cmd.linear.x = 0.5
+            self.cmd.linear.x = 0.4
             self.cmd.angular.z = -0.3 + calibration
         else: # perfect
-            self.cmd.linear.x = 0.5
+            self.cmd.linear.x = 0.4
 
         # Publishing the cmd_vel values to topipc
         self.publisher_.publish(self.cmd)
