@@ -52,9 +52,9 @@ class topicsp1(Node):
 
         calibration = 0.32
 
-        if self.laser_front < 0.75:
+        if self.laser_front < 0.85:
             self.cmd.linear.x = 0.3
-            self.cmd.angular.z = 0.5 + calibration
+            self.cmd.angular.z = 0.8 + calibration
         elif self.laser_left_min < 0.45: # too close to left wall
             self.cmd.linear.x = 0.35
             self.cmd.angular.z = 0.3 + calibration
