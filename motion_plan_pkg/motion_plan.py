@@ -23,7 +23,7 @@ class MotionPlan(Node):
             #                                           callback function (called whenever msg update),
             #                                           queue size (QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)))
         self.subscriber1 = self.create_subscription(msgType1, topic1, self.sensor_fusion, 10) #Sensor Fusion
-        self.subscriber2 = self.create_subscription(msgType2, topic2, self.race_line, 10) #Race line
+        self.subscriber2 = self.create_subscription(msgType2, topic2, self.race_line, 10) #Race line, not sure how often this will get updated... ideally never
         self.subscriber3 = self.create_subscription(msgType3, topic3, self.behavior, 10) #Behavior plan
         # prevent unused variable warning
 
