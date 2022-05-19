@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'exercise31 = exercise31_pkg.exercise31:main' #tweak
+            'motion_plan = motion_plan_pkg.motion_plan:main' #tweak
         ],
     },
 )
