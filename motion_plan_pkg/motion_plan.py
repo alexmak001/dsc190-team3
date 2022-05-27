@@ -26,16 +26,20 @@ class MotionPlan(Node):
             #self.publisher_ = self.create_publisher(msg/interface type (Twist, int, string, etc.),
             #                                        topic being published to ('cmd_vel'),
             #                                        queue size (10 usually, prevents late messages from stalling subscriber))
-        self.publisher_ = self.create_publisher('OutputMsgType-TBD', 'INSERT TOPIC', 10)
+
+        self.path_pub = self.create_publisher('OutputMsgType-TBD', 'INSERT TOPIC', 10)
         # create subsciber objects
             #self.subscriber = self.create_subscription(msg type (LaserScan, Twist, int, etc),
             #                                           topic being subscribed to ('/scan'),
             #                                           callback function (called whenever msg update),
             #                                           queue size (QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)))
         
-        self.subscriber1 = self.create_subscription(msgType1, topic1, self.sensor_fusion, 10) #Sensor Fusion
+        self.sensor_fusion_sub = self.create_subscription(msgType1, topic1, self.sensor_fusion, 10) #Sensor Fusion
+        
+        self.behavior_sub = self.create_subscription(str, topic3, self.behavior, 10) #Behavior plan
+
         #self.subscriber2 = self.create_subscription(msgType2, topic2, self.race_line, 10) #Race line, not sure how often this will get updated... ideally never
-        self.subscriber3 = self.create_subscription(msgType3, topic3, self.behavior, 10) #Behavior plan
+
         # prevent unused variable warning
 
         # define the timer period for 0.5 seconds
@@ -119,6 +123,10 @@ class MotionPlan(Node):
             PUBLISH TRAJ_SET FOR RACE CONTROL HERE!
             @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             """
+            # use numpy msg
+            self.twist_cmd.angular.z = steering_float
+            self.twist_cmd.linear.x = throttle_float
+            self.twist_publisher.publish(self.twist_cmd)
 
     def sensor_fusion(self, msg):
         self.obstacle_pos = msg
