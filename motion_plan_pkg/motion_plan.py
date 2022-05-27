@@ -50,8 +50,11 @@ class MotionPlan(Node):
         #self.timer = self.create_timer(timer period, callback function called every timer period) "updater"
         self.timer = self.create_timer(self.timer_period, self.plan_path)
 
-        # Sensor Message Variables
+        # Store sensor Message Variables
         self.object_list = None
+
+        # poblishable path msg objects
+        self.pathMsg = path_msg()
 
         """
         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -62,6 +65,7 @@ class MotionPlan(Node):
         obj_list_dummy = graph_ltpl.testing_tools.src.objectlist_dummy.ObjectlistDummy(dynamic=True,
                                                                                        vel_scale=0.3,
                                                                                        s0=250.0)
+        # self.sensor_fusion_sub()
 
         # init sample zone (NOTE: only valid with the default track and configuration!)
         # INFO: Zones can be used to temporarily block certain regions (e.g. pit lane, accident region, dirty track, ....).
@@ -129,10 +133,11 @@ class MotionPlan(Node):
             PUBLISH TRAJ_SET FOR RACE CONTROL HERE!
             @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             """
-            # use numpy msg
-            self.twist_cmd.angular.z = steering_float
-            self.twist_cmd.linear.x = throttle_float
-            self.twist_publisher.publish(self.twist_cmd)
+            self.plan_path(ltpl_obj)
+
+            # self.twist_cmd.angular.z = steering_float
+            # self.twist_cmd.linear.x = throttle_float
+            # self.twist_publisher.publish(self.twist_cmd)
 
     def sensor_fusion(self, msg):
         self.object_list = msg # type: list of dictionaries
@@ -146,11 +151,25 @@ class MotionPlan(Node):
     #     """
     #     self.behavior = msg
 
-    def plan_path(self):
+    def plan_path(self, ltpl_obj=ltpl_obj):
         #calculate path
 
+        # setup the path_msg
+        self.pathMsg.behavior = "BEHAVIOR"
+            self.pathMsg.path_pub = []
+            for obj in ltpl_obj:
+                tempPathObj = path_object() # TODO: change the object name
+
+                # populate the path_object
+                tempPathObj.s = None
+                """
+                TODO: msg population
+                """
+
+                self.pathMsg.path_pub.append(tempPathObj)
+
         #publish to topic for Race Control Team
-        self.publisher_.publish(self.msg)
+        self.path_pub.publish(self.pathMsg)
 
 
 
