@@ -32,8 +32,9 @@ class MotionPlan(Node):
             #                                           topic being subscribed to ('/scan'),
             #                                           callback function (called whenever msg update),
             #                                           queue size (QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)))
+        
         self.subscriber1 = self.create_subscription(msgType1, topic1, self.sensor_fusion, 10) #Sensor Fusion
-        self.subscriber2 = self.create_subscription(msgType2, topic2, self.race_line, 10) #Race line, not sure how often this will get updated... ideally never
+        #self.subscriber2 = self.create_subscription(msgType2, topic2, self.race_line, 10) #Race line, not sure how often this will get updated... ideally never
         self.subscriber3 = self.create_subscription(msgType3, topic3, self.behavior, 10) #Behavior plan
         # prevent unused variable warning
 
@@ -91,6 +92,7 @@ class MotionPlan(Node):
             obj_list = obj_list_dummy.get_objectlist()
 
             # -- CALCULATE PATHS FOR NEXT TIMESTAMP ----------------------------------------------------------------------------
+            # TODO: make sure this is subscribed to sensor fusion and object list
             ltpl_obj.calc_paths(prev_action_id=sel_action,
                                 object_list=obj_list,
                                 blocked_zones=zone_example)
@@ -146,7 +148,10 @@ def main(args=None):
     set 'globtraj_input_path' to path of wherever Team4 stores race line
     @@@@@@@@@@@@@@@@@@@@@@@@@@
     """
+    ### TODO do we need to subscribe to raceline or just get csv?
 
+    track_specifier = "berlin"
+    # will this be the format of raceline?
     # define all relevant paths
     path_dict = {'globtraj_input_path': toppath + "/inputs/traj_ltpl_cl/traj_ltpl_cl_" + track_specifier + ".csv", #replace with path of wherever Team4 stores race line
                  'graph_store_path': toppath + "/inputs/stored_graph.pckl", #new path to store graph of offline graph (?)
