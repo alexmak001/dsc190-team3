@@ -2,7 +2,8 @@ import rclpy
 # import the ROS2 python libraries
 from rclpy.node import Node
 
-from SENSOR_FUSION TEAM import msgType1
+# TODO: confirm package name with team 2
+from SENSOR_FUSION TEAM import TrackedObjects
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 
 import sys
@@ -14,7 +15,6 @@ import json
 import time
 import configparser
 import graph_ltpl
-
 
 class MotionPlan(Node):
 
@@ -33,10 +33,8 @@ class MotionPlan(Node):
             #                                           topic being subscribed to ('/scan'),
             #                                           callback function (called whenever msg update),
             #                                           queue size (QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)))
-        
-        self.sensor_fusion_sub = self.create_subscription(msgType1, topic1, self.sensor_fusion, 10) #Sensor Fusion
-        
-        self.behavior_sub = self.create_subscription(str, topic3, self.behavior, 10) #Behavior plan
+
+        self.sensor_fusion_sub = self.create_subscription(TrackedObjects, "tracked_objects", self.sensor_fusion, 10) #Sensor Fusion
 
         #self.subscriber2 = self.create_subscription(msgType2, topic2, self.race_line, 10) #Race line, not sure how often this will get updated... ideally never
 
@@ -51,6 +49,9 @@ class MotionPlan(Node):
         self.msg = 'OutputMsgType-TBD'
         #self.timer = self.create_timer(timer period, callback function called every timer period) "updater"
         self.timer = self.create_timer(self.timer_period, self.plan_path)
+
+        # Sensor Message Variables
+        self.object_list = None
 
         """
         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -81,7 +82,11 @@ class MotionPlan(Node):
         while True:
             # -- SELECT ONE OF THE PROVIDED TRAJECTORIES -----------------------------------------------------------------------
             # (here: brute-force, replace by sophisticated behavior planner)
-
+            """
+            Team 1 Works Here: behavior decision making
+            """
+            # for obj in obj_list:
+            #     obj.X
             """
             @@@@@@@@@@@@@@@@@@@@@@@
             USE BEHAVIOR VALUE HERE
@@ -93,6 +98,7 @@ class MotionPlan(Node):
 
 
             # get simple object list (one vehicle driving around the track)
+            # TODO: dummy will be replaced by subscriber data: self.object_list
             obj_list = obj_list_dummy.get_objectlist()
 
             # -- CALCULATE PATHS FOR NEXT TIMESTAMP ----------------------------------------------------------------------------
@@ -129,13 +135,16 @@ class MotionPlan(Node):
             self.twist_publisher.publish(self.twist_cmd)
 
     def sensor_fusion(self, msg):
-        self.obstacle_pos = msg
+        self.object_list = msg # type: list of dictionaries
 
     def race_line(self, msg): #import offline graph calculation and store here?
         self.race_line = msg
 
-    def behavior(self, msg):
-        self.behavior = msg
+    # def behavior(self, msg):
+    #     """
+    #     TODO: Team 1: modify to set behavior from the local code
+    #     """
+    #     self.behavior = msg
 
     def plan_path(self):
         #calculate path
