@@ -16,6 +16,11 @@ import time
 import configparser
 import graph_ltpl
 
+from planning_interfaces.msg import PathMsg
+from planning_interfaces.msg import PathObject
+from planning_interfaces.msg import SensorMsg
+from planning_interfaces.msg import SensorObject
+
 class MotionPlan(Node):
 
     def __init__(self):
