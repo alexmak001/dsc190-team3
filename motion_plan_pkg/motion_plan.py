@@ -95,6 +95,7 @@ class MotionPlan(Node):
             USE BEHAVIOR VALUE HERE
             @@@@@@@@@@@@@@@@@@@@@@@
             """
+            behavior = None 
             for sel_action in ["right", "left", "straight", "follow"]:  # try to force 'right', else try next in list
                 if sel_action in traj_set.keys():
                     break
@@ -126,6 +127,7 @@ class MotionPlan(Node):
                                                  vel_est=vel_est)[0]
             # -- SEND TRAJECTORIES TO CONTROLLER -------------------------------------------------------------------------------
             # select a trajectory from the set and send it to the controller here
+            self.get_logger().info(traj_set[behavior])
 
             """
             @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
