@@ -18,6 +18,11 @@ import time
 import configparser
 import graph_ltpl
 
+from planning_interfaces.msg import PathMsg
+from planning_interfaces.msg import PathObject
+from planning_interfaces.msg import SensorMsg
+from planning_interfaces.msg import SensorObject
+
 class MotionPlan(Node):
 
     def __init__(self):
@@ -175,7 +180,7 @@ def main(args=None):
     set 'globtraj_input_path' to path of wherever Team4 stores race line
     @@@@@@@@@@@@@@@@@@@@@@@@@@
     """
-    ### TODO do we need to subscribe to raceline or just get csv?
+    ### TODO do we need to subscribe to raceline or just get csv? dummy berlin track for now
 
     track_specifier = "berlin"
     # will this be the format of raceline?
