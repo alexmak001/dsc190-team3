@@ -1,2 +1,2 @@
-std_msgs/Header header
-SensorObject[] sensor_objects
+std_msgs/Header     header
+SensorObject[]      sensor_objects

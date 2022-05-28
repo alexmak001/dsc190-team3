@@ -3,7 +3,9 @@ import rclpy
 from rclpy.node import Node
 
 # TODO: confirm package name with team 2
-from SENSOR_FUSION TEAM import TrackedObjects
+from planning_interface.msg import PathMsg, SensorMsg, PathObject, SensorObject # Dummy Objects
+# from team02_interface.msg import TrackedObjects # Saved for later
+
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 
 import sys
@@ -23,38 +25,29 @@ class MotionPlan(Node):
         # call the class constructor
         super().__init__('motion_plan')
         # create the publisher object (Output to Race Control)
-            #self.publisher_ = self.create_publisher(msg/interface type (Twist, int, string, etc.),
-            #                                        topic being published to ('cmd_vel'),
-            #                                        queue size (10 usually, prevents late messages from stalling subscriber))
-
         self.path_pub = self.create_publisher('OutputMsgType-TBD', 'INSERT TOPIC', 10)
+
         # create subsciber objects
-            #self.subscriber = self.create_subscription(msg type (LaserScan, Twist, int, etc),
-            #                                           topic being subscribed to ('/scan'),
-            #                                           callback function (called whenever msg update),
-            #                                           queue size (QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)))
+        self.sensor_fusion_sub = self.create_subscription(SensorMsg, 'tracked_objects', self.sensor_fusion, 10) # Dummy Sub
+        self.sensor_fusion_sub
 
-        self.sensor_fusion_sub = self.create_subscription(TrackedObjects, "tracked_objects", self.sensor_fusion, 10) #Sensor Fusion
+        # self.sensor_fusion_sub = self.create_subscription(TrackedObjects, "tracked_objects", self.sensor_fusion, 10) #Sensor Fusion
 
-        #self.subscriber2 = self.create_subscription(msgType2, topic2, self.race_line, 10) #Race line, not sure how often this will get updated... ideally never
+        # self.race_line_sub = self.create_subscription(msgType2, topic2, self.race_line, 10) #Race line, not sure how often this will get updated... ideally never
 
         # prevent unused variable warning
 
         # define the timer period for 0.5 seconds
         self.timer_period = 0.5
-        # define the variable to save the received info
-            #self.variables = 0
 
-        # create a Twist message, create output (make a path variable)
-        self.msg = 'OutputMsgType-TBD'
         #self.timer = self.create_timer(timer period, callback function called every timer period) "updater"
         self.timer = self.create_timer(self.timer_period, self.plan_path)
 
         # Store sensor Message Variables
         self.object_list = None
 
-        # poblishable path msg objects
-        self.pathMsg = path_msg()
+        # publishable path msg objects
+        self.pathMsg = PathMsg()
 
         """
         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -89,8 +82,9 @@ class MotionPlan(Node):
             """
             Team 1 Works Here: behavior decision making
             """
-            # for obj in obj_list:
-            #     obj.X
+
+
+
             """
             @@@@@@@@@@@@@@@@@@@@@@@
             USE BEHAVIOR VALUE HERE
@@ -133,11 +127,8 @@ class MotionPlan(Node):
             PUBLISH TRAJ_SET FOR RACE CONTROL HERE!
             @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             """
-            self.plan_path(ltpl_obj)
+            self.plan_path(ltpl_obj) # call the publisher function
 
-            # self.twist_cmd.angular.z = steering_float
-            # self.twist_cmd.linear.x = throttle_float
-            # self.twist_publisher.publish(self.twist_cmd)
 
     def sensor_fusion(self, msg):
         self.object_list = msg # type: list of dictionaries

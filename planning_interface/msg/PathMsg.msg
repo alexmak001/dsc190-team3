@@ -1,2 +1,2 @@
 string          behavior
-PathObject[] path_objects
+PathObject[]    path_objects
