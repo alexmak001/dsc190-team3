@@ -184,7 +184,7 @@ def main(args=None):
     set 'globtraj_input_path' to path of wherever Team4 stores race line
     @@@@@@@@@@@@@@@@@@@@@@@@@@
     """
-    ### TODO do we need to subscribe to raceline or just get csv?
+    ### TODO do we need to subscribe to raceline or just get csv? dummy berlin track for now
 
     track_specifier = "berlin"
     # will this be the format of raceline?
