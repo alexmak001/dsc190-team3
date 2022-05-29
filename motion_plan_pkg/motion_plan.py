@@ -86,20 +86,100 @@ class MotionPlan(Node):
             # (here: brute-force, replace by sophisticated behavior planner)
             """
             Team 1 Works Here: behavior decision making
+
+            Basic Logic: Take the closest opponent's distance and pick behavior.
+            - check direct distance to the car to make sure there are enough room
+            - check orientation to look for overtaking opportunity
+            - cases:
+                1. no opponents: straight
+                2. more than 1 opponents close to the car: follow
+                3. if one side of the closest opponent is open: overtake
             """
 
+            """Distance Constant"""
+            opponents_distance_offset = 20 # Modify to fit actual value of car length
+            opponents_horizontal_angle_offset = 20 # Modify to fit actual value of car width
 
+            """State Variable"""
+            find_dist = lambda x1, y1, x2, y2: np.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+            # Populate with pathMsg
+            self_X, self_Y = 0, 0
+            car_distance_wall = [0, 0]
+            self_leftwall_bound, self_rightwall_bound = 0, 0
+            self_velocity = 0
+
+            # Populate with sensorMsg
+            opponent_count = 0
+            nearest_opponet_index = 0
+            orientation_angle = [0]*len(self.object_list)
+            opponent_relative_direction = [0]*len(self.object_list) # ahaed of behind or align
+            opponent_linear_distances = [float('inf')]*len(self.object_list)
+            opponent_dimensions = [[0, 0]]*len(self.object_list)
+            opponent_velocity = [0]*len(self.object_list)
+
+            opponet_horizontal_distance = [0]*len(self.object_list)
+            relative_velocity = [0]*len(self.object_list)
+            # acceleration = [0]*len(self.object_list) # IDK how to calculate this tbh
+
+            action_state = [] # order the options in order
+
+            # Utility variables
+            temp_min_distance = float('inf')
+
+            for index, obj in enumerate(self.object_list):
+                opponent_count+=1
+                opponent_linear_distances[index] = np.sqrt((obj.X - self_X)**2 + (obj.Y - self_Y)**2)
+                if (obj.Y - self_Y) > 10:
+                    # ahead
+                    opponent_relative_direction = 0
+                elif (obj.Y - self_Y) < -10
+                    # behind
+                    opponent_relative_direction = 1
+                else:
+                    # align
+                    opponent_relative_direction = 0
+
+                orientation_angle[index] = obj.theta
+                opponent_velocity[index] = v if v in obj else v_x
+                relative_velocity[index] = opponent_velocity[index] - self_velocity
+                opponents_horizontal_distance[index] = self_X-obj.X
+
+                # find the cloest opponent
+                if temp_min_distance > opponent_distances[-1]:
+                    temp_min_distance = opponent_distances[-1]
+                    nearest_opponet_index = index
+
+            # no opponent detected
+            if opponent_count == 0:
+                action_state.append('straight')
+
+            # opponent detected
+            else:
+                # check distance
+                if opponent_distances[nearest_opponet_index] > 20:
+                    action_state.append('follow')
+                else:
+                    if relative_velocity < 0:
+                        if abs(self_X - self_leftwall_bound) > abs(self_rightwall_bound - self_X) :
+                            action_state.append('left')
+                        else:
+                            action_state.append('right')
+                        action_state.append(self.legacy_state[0]) # taking the bast option from the previous decision, ex: if we were overtaking, we probably still want to overtake
+                        action_state.append('follow')
+                    else:
+                        action_state.append('follow')
+
+                self.legacy_state = action_state
 
             """
             @@@@@@@@@@@@@@@@@@@@@@@
             USE BEHAVIOR VALUE HERE
             @@@@@@@@@@@@@@@@@@@@@@@
             """
-            behavior = None 
             for sel_action in ["right", "left", "straight", "follow"]:  # try to force 'right', else try next in list
                 if sel_action in traj_set.keys():
+                    behavior = sel_action
                     break
-
 
             # get simple object list (one vehicle driving around the track)
             # TODO: dummy will be replaced by subscriber data: self.object_list
