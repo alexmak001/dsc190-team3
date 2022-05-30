@@ -132,7 +132,7 @@ class MotionPlan(Node):
                 if (obj.Y - self_Y) > 10:
                     # ahead
                     opponent_relative_direction = 0
-                elif (obj.Y - self_Y) < -10
+                elif (obj.Y - self_Y) < -10:
                     # behind
                     opponent_relative_direction = 1
                 else:
@@ -234,17 +234,17 @@ class MotionPlan(Node):
 
         # setup the path_msg
         self.pathMsg.behavior = "BEHAVIOR"
-            self.pathMsg.path_pub = []
-            for obj in ltpl_obj:
-                tempPathObj = path_object() # TODO: change the object name
+        self.pathMsg.path_pub = []
+        for obj in ltpl_obj:
+            tempPathObj = path_object() # TODO: change the object name
 
-                # populate the path_object
-                tempPathObj.s = None
-                """
-                TODO: msg population
-                """
+            # populate the path_object
+            tempPathObj.s = None
+            """
+            TODO: msg population
+            """
 
-                self.pathMsg.path_pub.append(tempPathObj)
+            self.pathMsg.path_pub.append(tempPathObj)
 
         #publish to topic for Race Control Team
         self.path_pub.publish(self.pathMsg)
