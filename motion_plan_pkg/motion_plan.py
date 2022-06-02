@@ -3,7 +3,7 @@ import rclpy
 from rclpy.node import Node
 
 # TODO: confirm package name with team 2
-from planning_interface.msg import PathMsg, SensorMsg, PathObject, SensorObject # Dummy Objects
+#from planning_interface.msg import PathMsg, SensorMsg, PathObject, SensorObject # Dummy Objects
 # from team02_interface.msg import TrackedObjects # Saved for later
 
 from rclpy.qos import ReliabilityPolicy, QoSProfile
@@ -18,8 +18,10 @@ import time
 import configparser
 import graph_ltpl
 
-from planning_interfaces.msg import SensorMsg
-from planning_interfaces.msg import SensorObject
+##from planning_interfaces.msg import SensorMsg
+#from planning_interfaces.msg import SensorObject
+
+
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped
 
@@ -33,9 +35,11 @@ class MotionPlan(Node):
         self.path_pub = self.create_publisher(Path, 'motion_plan', 10)
 
         # create subsciber objects
-        self.sensor_fusion_sub = self.create_subscription(SensorMsg, 'tracked_objects', self.sensor_fusion, 10) # Dummy Sub
-        self.sensor_fusion_sub
+        #### FIX LATER ###
+        #self.sensor_fusion_sub = self.create_subscription(SensorMsg, 'tracked_objects', self.sensor_fusion, 10) # Dummy Sub
 
+
+                                                                                   
         # self.sensor_fusion_sub = self.create_subscription(TrackedObjects, "tracked_objects", self.sensor_fusion, 10) #Sensor Fusion
 
         # self.race_line_sub = self.create_subscription(msgType2, topic2, self.race_line, 10) #Race line, not sure how often this will get updated... ideally never
@@ -48,8 +52,11 @@ class MotionPlan(Node):
         #self.timer = self.create_timer(timer period, callback function called every timer period) "updater"
         self.timer = self.create_timer(self.timer_period, self.plan_path)
 
+        ### FIX ###
+        # init dummy object list
+        obj_list_dummy = graph_ltpl.testing_tools.src.objectlist_dummy.ObjectlistDummy(dynamic=False,vel_scale=0.3,s0=250.0)
         # Store sensor Message Variables
-        self.object_list = None
+        self.object_list = obj_list_dummy.get_objectlist()
 
         # publishable path msg objects
         self.pathMsg = Path()
@@ -60,9 +67,7 @@ class MotionPlan(Node):
         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         """
         # init dummy object list
-        obj_list_dummy = graph_ltpl.testing_tools.src.objectlist_dummy.ObjectlistDummy(dynamic=True,
-                                                                                       vel_scale=0.3,
-                                                                                       s0=250.0)
+        #obj_list_dummy = graph_ltpl.testing_tools.src.objectlist_dummy.ObjectlistDummy(dynamic=False,vel_scale=0.3,s0=250.0)
         # self.sensor_fusion_sub()
 
         # init sample zone (NOTE: only valid with the default track and configuration!)
@@ -248,7 +253,7 @@ class MotionPlan(Node):
     #     """
     #     self.behavior = msg
 
-    def plan_path(self, ltpl_obj=ltpl_obj):
+    def plan_path(self, ltpl_obj):
         #calculate path
 
         # setup the path_msg
