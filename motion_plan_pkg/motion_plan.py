@@ -22,6 +22,7 @@ from planning_interfaces.msg import PathMsg
 from planning_interfaces.msg import PathObject
 from planning_interfaces.msg import SensorMsg
 from planning_interfaces.msg import SensorObject
+from planning_interfaces.msg import OutputArray
 
 class MotionPlan(Node):
 
@@ -30,7 +31,7 @@ class MotionPlan(Node):
         # call the class constructor
         super().__init__('motion_plan')
         # create the publisher object (Output to Race Control)
-        self.path_pub = self.create_publisher('OutputMsgType-TBD', 'INSERT TOPIC', 10)
+        self.path_pub = self.create_publisher(OutputArray, 'motion_plan', 10)
 
         # create subsciber objects
         self.sensor_fusion_sub = self.create_subscription(SensorMsg, 'tracked_objects', self.sensor_fusion, 10) # Dummy Sub
