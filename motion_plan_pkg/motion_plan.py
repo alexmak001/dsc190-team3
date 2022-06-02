@@ -18,11 +18,10 @@ import time
 import configparser
 import graph_ltpl
 
-from planning_interfaces.msg import PathMsg
-from planning_interfaces.msg import PathObject
 from planning_interfaces.msg import SensorMsg
 from planning_interfaces.msg import SensorObject
-from planning_interfaces.msg import OutputArray
+from nav_msgs.msg import Path
+from geometry_msgs.msg import PoseStamped
 
 class MotionPlan(Node):
 
@@ -31,7 +30,7 @@ class MotionPlan(Node):
         # call the class constructor
         super().__init__('motion_plan')
         # create the publisher object (Output to Race Control)
-        self.path_pub = self.create_publisher(OutputArray, 'motion_plan', 10)
+        self.path_pub = self.create_publisher(Path, 'motion_plan', 10)
 
         # create subsciber objects
         self.sensor_fusion_sub = self.create_subscription(SensorMsg, 'tracked_objects', self.sensor_fusion, 10) # Dummy Sub
@@ -53,7 +52,7 @@ class MotionPlan(Node):
         self.object_list = None
 
         # publishable path msg objects
-        self.pathMsg = PathMsg()
+        self.pathMsg = Path()
 
         """
         @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -215,8 +214,27 @@ class MotionPlan(Node):
             PUBLISH TRAJ_SET FOR RACE CONTROL HERE!
             @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             """
-            self.plan_path(ltpl_obj) # call the publisher function
+            # why are we sending entire obj? why not send in 
+            #self.plan_path(ltpl_obj) # call the publisher function
 
+            # new test way by alex, publish only trajectrory
+            # input final array that needs to be published
+            self.send_path(traj_set[behavior])
+    
+    
+    def send_path(self, traj):
+        """
+        Input: 2D numpy array
+        Publish: Only X and Y columns of the input
+        """
+        for row in traj:
+            pose_msg = PoseStamped()
+            pose_msg.pose.position.x = row[1]
+            pose_msg.pose.position.y = row[2]
+
+            self.path_msg.poses.append(pose_msg)
+        
+        self.path_pub.publish(self.path_msg)
 
     def sensor_fusion(self, msg):
         self.object_list = msg # type: list of dictionaries
@@ -237,7 +255,7 @@ class MotionPlan(Node):
         self.pathMsg.behavior = "BEHAVIOR"
         self.pathMsg.path_pub = []
         for obj in ltpl_obj:
-            tempPathObj = path_object() # TODO: change the object name
+            tempPathObj = PoseStampeds() # TODO: change the object name
 
             # populate the path_object
             tempPathObj.s = None
