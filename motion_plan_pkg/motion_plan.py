@@ -300,6 +300,7 @@ class MotionPlan(Node):
             self.pathMsg.poses.append(pose_msg)
 
         self.path_pub.publish(self.pathMsg)
+        self.pathMsg = Path()
 
     def sensor_fusion(self, msg):
         self.object_list = msg # type: list of dictionaries
