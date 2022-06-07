@@ -22,8 +22,10 @@ import graph_ltpl
 #from planning_interfaces.msg import SensorObject
 
 
-from nav_msgs.msg import Path
+from nav_msgs.msg import Path, Odometry
 from geometry_msgs.msg import PoseStamped
+from vision_msgs.msg import Detection3DArray, Detection3D, BoundingBox3D
+
 
 class MotionPlan(Node):
 
@@ -32,7 +34,8 @@ class MotionPlan(Node):
         # call the class constructor
         super().__init__('motion_plan')
 
-        toppath = os.path.dirname(os.path.realpath(__file__))
+        # toppath = os.path.dirname(os.path.realpath(__file__))
+        toppath = "/home/triton-ai/dsc_sim_ws_motion_planning/src/motion_plan_pkg/motion_plan_pkg"
         sys.path.append(toppath)
 
         """
@@ -89,9 +92,15 @@ class MotionPlan(Node):
         # create subsciber objects
         #### FIX LATER ###
         #self.sensor_fusion_sub = self.create_subscription(SensorMsg, 'tracked_objects', self.sensor_fusion, 10) # Dummy Sub
+        
+        self.object_list = None
+        self.odom_msg = None 
 
-
-                                                                                   
+        # For simulation: 
+        self.odometry = self.create_subscription(Odometry, '/ego_racecar/odom', self.odom_fusion, 10)
+        self.dummy_detection = self.create_subscription(Detection3DArray, '/dummy_detection', self.sensor_fusion, 10)
+        self.odom_flag = False
+        self.dummy_flag = False                            
         # self.sensor_fusion_sub = self.create_subscription(TrackedObjects, "tracked_objects", self.sensor_fusion, 10) #Sensor Fusion
 
         # self.race_line_sub = self.create_subscription(msgType2, topic2, self.race_line, 10) #Race line, not sure how often this will get updated... ideally never
@@ -104,7 +113,8 @@ class MotionPlan(Node):
         # init dummy object list
         obj_list_dummy = graph_ltpl.testing_tools.src.objectlist_dummy.ObjectlistDummy(dynamic=False,vel_scale=0.3,s0=250.0)
         # Store sensor Message Variables
-        self.object_list = obj_list_dummy.get_objectlist()
+        # TODO: Switch to dummy data  # self.object_list = obj_list_dummy.get_objectlist()
+
 
         # publishable path msg objects
         self.pathMsg = Path()
@@ -187,7 +197,7 @@ class MotionPlan(Node):
         # print(self.object_list)
 
         for index, obj in enumerate(self.object_list):
-            # print(obj)
+            print(obj) # TODO: Remember to switch back 
             opponent_count+=1
             opponent_linear_distances[index] = np.sqrt((obj['X'] - self_X)**2 + (obj['Y'] - self_Y)**2)
             if (obj['Y'] - self_Y) > 10:
@@ -290,7 +300,12 @@ class MotionPlan(Node):
         Input: 2D numpy array
         Publish: Only X and Y columns of the output
         """
-        #print(traj)
+
+        # TODO: Move behavior decision part here 
+
+        if not self.odom_flag or not self.dummy_flag: 
+            return 
+      
         self.pathMsg.header.frame_id = 'map'
         for row in self.traj_set[self.behavior][0]:
             pose_msg = PoseStamped()
@@ -299,40 +314,55 @@ class MotionPlan(Node):
 
             self.pathMsg.poses.append(pose_msg)
 
+        # print(self.pathMsg)
         self.path_pub.publish(self.pathMsg)
         self.pathMsg = Path()
 
-    def sensor_fusion(self, msg):
+    def sensor_fusion(self, msg): 
+
+        # TODO: Populate object data 
+
+        self.dummy_flag = True  
+        print(msg)
         self.object_list = msg # type: list of dictionaries
+        print(self.object_list)
+
 
     def race_line(self, msg): #import offline graph calculation and store here?
         self.race_line = msg
 
-    # def behavior(self, msg):
-    #     """
-    #     TODO: Team 1: modify to set behavior from the local code
-    #     """
-    #     self.behavior = msg
+    def odom_fusion(self, msg): 
 
-    def plan_path(self, ltpl_obj):
-        #calculate path
+        # TODO: Populate odometry data
 
-        # setup the path_msg
-        self.pathMsg.behavior = "BEHAVIOR"
-        self.pathMsg.path_pub = []
-        for obj in ltpl_obj:
-            tempPathObj = PoseStampeds() # TODO: change the object name
+        self.odom_flag = True
+        self.odom_msg = msg
 
-            # populate the path_object
-            tempPathObj.s = None
-            """
-            TODO: msg population
-            """
+    def behavior(self, msg):
+        """
+        TODO: Team 1: modify to set behavior from the local code
+        """
+        self.behavior = msg
 
-            self.pathMsg.path_pub.append(tempPathObj)
+    # def plan_path(self, ltpl_obj):
+    #     #calculate path
 
-        #publish to topic for Race Control Team
-        self.path_pub.publish(self.pathMsg)
+    #     # setup the path_msg
+    #     self.pathMsg.behavior = "BEHAVIOR"
+    #     self.pathMsg.path_pub = []
+    #     for obj in ltpl_obj:
+    #         tempPathObj = PoseStampeds() # TODO: change the object name
+
+    #         # populate the path_object
+    #         tempPathObj.s = None
+    #         """
+    #         TODO: msg population
+    #         """
+
+    #         self.pathMsg.path_pub.append(tempPathObj)
+
+    #     #publish to topic for Race Control Team
+    #     self.path_pub.publish(self.pathMsg)
 
 
 
