@@ -149,9 +149,8 @@ class MotionPlan(Node):
         #self.timer = self.create_timer(timer period, callback function called every timer period) "updater"
         self.timer = self.create_timer(self.timer_period, self.send_path)
 
-        #while True:
-            # -- SELECT ONE OF THE PROVIDED TRAJECTORIES -----------------------------------------------------------------------
-            # (here: brute-force, replace by sophisticated behavior planner)
+        # -- SELECT ONE OF THE PROVIDED TRAJECTORIES -----------------------------------------------------------------------
+        # (here: brute-force, replace by sophisticated behavior planner)
         """
         Team 1 Works Here: behavior decision making
 
