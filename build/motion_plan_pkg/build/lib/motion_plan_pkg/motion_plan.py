@@ -21,36 +21,57 @@ class MotionPlan(Node):
         # Here we have the class constructor
         # call the class constructor
         super().__init__('motion_plan')
-        toppath = os.path.dirname(os.path.realpath(__file__))
+        toppath = "/home/triton-ai/motion_plan_pkg/motion_plan_pkg"
         sys.path.append(toppath)
 
-        # """
-        # @@@@@@@@@@@@@@@@@@@@@@@@@@
-        # GET CSV FOR RACE LINE HERE
 
-        # set 'globtraj_input_path' to path of wherever Team4 stores race line
-        # @@@@@@@@@@@@@@@@@@@@@@@@@@
-        # """
-        # track_specifier = "berlin"
-        # # define all relevant paths
-        # path_dict = {'globtraj_input_path': toppath + "/inputs/traj_ltpl_cl/traj_ltpl_cl_" + track_specifier + ".csv", #replace with path of wherever Team4 stores race line
-        #             'graph_store_path': toppath + "/inputs/stored_graph.pckl", #new path to store graph of offline graph (?)
-        #             'ltpl_offline_param_path': toppath + "/params/ltpl_config_offline.ini", #params for generating offline graph (all possible nodes, splines, etc.)
-        #             'ltpl_online_param_path': toppath + "/params/ltpl_config_online.ini", #params for generating online graph (all possible nodes, splines, etc.)
-        #             'log_path': toppath + "/logs/graph_ltpl/",  #new path to store local path csv's and messages that are regularly updated and published? and offline graphs
-        #             'graph_log_id': datetime.datetime.now().strftime("%Y_%m_%d__%H_%M_%S") #date time for organizing logs
-        #             }
+        # init dummy object list
+        self.obj_list_dummy = graph_ltpl.testing_tools.src.objectlist_dummy.ObjectlistDummy(dynamic=False,vel_scale=0.3,s0=250.0)
+        self.object_list = self.obj_list_dummy.get_objectlist()
+        # self.object_list = [{'X': 75, 'Y': 103, 'theta': 0.0, 'type': 'physical', 'id': 1, 'length': 1.0, 'width': 1.0, 'v': 0.0}]
+
+        # state variables
+        self.traj_set = {'straight': None}
+        self.legacy_state = []
+        self.behavior = 'straight'
+        self.odom_flag, self.dummy_flag = True, True 
+
+        # publishable path msg objects
+        self.pathMsg = Path()
+
+        # create the publisher object (Output to Race Control)
+        self.path_pub = self.create_publisher(Path, 'motion_plan', 10)
+
+        # create timer
+        self.timer_period = 0.01
+        self.timer = self.create_timer(self.timer_period, self.send_path)
+
+        # create subsciber objects
+        # self.odom_sub = self.create_subscription()
+        # self.object_sub = self.create_subscription()
+
 
 
         # ----------------------------------------------------------------------------------------------------------------------
         # INITIALIZATION AND OFFLINE PART --------------------------------------------------------------------------------------
         # ----------------------------------------------------------------------------------------------------------------------
+        
+        track_specifier = "ims"
+        # define all relevant paths
+        path_dict = {'globtraj_input_path': toppath + "/inputs/traj_ltpl_cl/traj_ltpl_cl_" + track_specifier + ".csv", #replace with path of wherever Team4 stores race line
+                    'graph_store_path': toppath + "/inputs/stored_graph.pckl", #new path to store graph of offline graph (?)
+                    'ltpl_offline_param_path': toppath + "/params/ltpl_config_offline.ini", #params for generating offline graph (all possible nodes, splines, etc.)
+                    'ltpl_online_param_path': toppath + "/params/ltpl_config_online.ini", #params for generating online graph (all possible nodes, splines, etc.)
+                    'log_path': toppath + "/logs/graph_ltpl/",  #new path to store local path csv's and messages that are regularly updated and published? and offline graphs
+                    'graph_log_id': datetime.datetime.now().strftime("%Y_%m_%d__%H_%M_%S") #date time for organizing logs
+                    }
+
 
         # intialize graph_ltpl-class
         self.ltpl_obj = graph_ltpl.Graph_LTPL.Graph_LTPL(path_dict=path_dict,
                                                     visual_mode=True, #disable when actually running on car
                                                     log_to_file=True)
-
+        
         # calculate offline graph
         self.ltpl_obj.graph_init()
 
@@ -62,50 +83,14 @@ class MotionPlan(Node):
         self.vel_est = 0.0
 
         # puts car on graph based on start pose
-        self.ltpl_obj.set_startpos(pos_est=pos_est,
-                            heading_est=heading_est)
+        self.ltpl_obj.set_startpos(pos_est=self.pos_est,
+                            heading_est=self.heading_est)
 
-        # # init dummy object list
-        self.obj_list_dummy = graph_ltpl.testing_tools.src.objectlist_dummy.ObjectlistDummy(dynamic=False,vel_scale=0.3,s0=250.0)
-        # Store sensor Message Variables; TODO change to subscriber based appraoch for the sim
-        self.object_list = self.obj_list_dummy.get_objectlist()
+        # self.traj_set = self.ltpl_obj.calc_vel_profile(pos_est=self.pos_est,
+        #                                         vel_est=self.vel_est)[0]
 
-        # state variables
-        self.traj_set = {'straight': None}
-        self.legacy_state = []
-        self.behavior = None
-        self.odom_flag, self.dummy_flag = False, False
 
-        # publishable path msg objects
-        self.pathMsg = Path()
-
-        # create the publisher object (Output to Race Control)
-        self.path_pub = self.create_publisher(Path, 'motion_plan', 10)
-
-        # create timer
-        self.timer_period = 0.5
-        self.timer = self.create_timer(self.timer_period, self.send_path)
-
-        # create subsciber objects
-        # self.odom_sub = self.create_subscription()
-        # self.object_sub = self.create_subscription()
-
-        """
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        INPUT OBJECT LIST FROM SENSOR FUSION TEAM HERE
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        """
-        # init dummy object list
-        #obj_list_dummy = graph_ltpl.testing_tools.src.objectlist_dummy.ObjectlistDummy(dynamic=False,vel_scale=0.3,s0=250.0)
-        # self.sensor_fusion_sub()
-
-        # init sample zone (NOTE: only valid with the default track and configuration!)
-        # INFO: Zones can be used to temporarily block certain regions (e.g. pit lane, accident region, dirty track, ....).
-        #       Each zone is specified in a as a dict entry, where the key is the zone ID and the value is a list with the cells
-        #        * blocked layer numbers (in the graph) - pairwise with blocked node numbers
-        #        * blocked node numbers (in the graph) - pairwise with blocked layer numbers
-        #        * numpy array holding coordinates of left bound of region (columns x and y)
-        #        * numpy array holding coordinates of right bound of region (columns x and y)
+        self.tic = time.time()
 
         # self.zone_example = {'sample_zone': [[64, 64, 64, 64, 64, 64, 64, 65, 65, 65, 65, 65, 65, 65, 66, 66, 66, 66, 66, 66, 66], #blocked layers
         #                                 [0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6], #blocked nodes, pair with blocked layers
@@ -117,18 +102,29 @@ class MotionPlan(Node):
         Input: 2D numpy array
         Publish: Only X and Y columns of the output
         """
-        if not self.odom_flag or not self.dummy_flag:
-            self.path_pub.publish(self.pathMsg)
-            return
+        # Comment this out when not using simulator
+        # if not self.odom_flag or not self.dummy_flag:
+        #     self.get_logger().info("Behavior: {%s}" % (self.behavior))
+        #     return
 
         self.behavior_planning()
         self.calc_local_path()
-
+        
+        
+        # for sel_action in action_state:
+        for sel_action in self.action_state:  # try to force 'right', else try next in list
+            if sel_action in self.traj_set.keys():
+                self.behavior = sel_action
+                break
 
         # Print what behavior is choosen
+        self.get_logger().info("Action State: {%s}" % (self.action_state))
         self.get_logger().info("Behavior: {%s}" % (self.behavior))
 
         self.pathMsg.header.frame_id = 'map'
+
+        self.get_logger().info("Trag Set: {%s}" % list(self.traj_set.keys()))
+
         for row in self.traj_set[self.behavior][0]:
             pose_msg = PoseStamped()
             pose_msg.pose.position.x = row[1]
@@ -140,33 +136,32 @@ class MotionPlan(Node):
         self.pathMsg = Path()
 
     def calc_local_path(self):
-        tic = time.time()
-        # -- CALCULATE PATHS FOR NEXT TIMESTAMP ----------------------------------------------------------------------------
         self.ltpl_obj.calc_paths(prev_action_id=self.behavior,
                             object_list=self.object_list)
                             # blocked_zones=zone_example)
 
-        self.traj_set = self.ltpl_obj.calc_vel_profile(pos_est=self.pos_est,
-                                                vel_est=self.vel_est)[0]
-
         if self.traj_set[self.behavior] is not None:
-            pos_est, vel_est = graph_ltpl.testing_tools.src.vdc_dummy.\
-                vdc_dummy(pos_est=pos_est,
+            self.pos_est, self.vel_est = graph_ltpl.testing_tools.src.vdc_dummy.\
+                vdc_dummy(pos_est=self.pos_est,
                             last_s_course=(self.traj_set[self.behavior][0][:, 0]),
                             last_path=(self.traj_set[self.behavior][0][:, 1:3]),
                             last_vel_course=(self.traj_set[self.behavior][0][:, 5]),
-                            iter_time=time.time() - tic)
-        tic = time.time()
+                            iter_time=time.time() - self.tic)
+
+        self.traj_set = self.ltpl_obj.calc_vel_profile(pos_est=self.pos_est,
+                                                vel_est=self.vel_est)[0]
+
+        self.tic = time.time()
 
     def sensor_fusion(self, msg):
         self.dummy_flag = True
-        self.object_list = msg # type: list of dictionaries
+        self.object_list = msg 
 
     def odom_fusion(self, msg):
         self.odom_flag = True
         self.odom_msg = msg
 
-    def race_line(self, msg): #import offline graph calculation and store here?
+    def race_line(self, msg):
         self.race_line = msg
 
 
@@ -199,14 +194,14 @@ class MotionPlan(Node):
         opponent_count = 0
         nearest_opponet_index = 0
         orientation_angle = [0]*len(self.object_list)
-        opponent_relative_direction = [0]*len(self.object_list) # ahaed of behind or align
+        # opponent_relative_direction = [0]*len(self.object_list) # ahaed of behind or align
         opponent_linear_distances = [float('inf')]*len(self.object_list)
-        opponent_dimensions = [[0, 0]]*len(self.object_list)
+        # opponent_dimensions = [[0, 0]]*len(self.object_list)
         opponent_velocity = [0]*len(self.object_list)
 
         opponent_horizontal_distance = [0]*len(self.object_list)
         relative_velocity = [0]*len(self.object_list)
-        # acceleration = [0]*len(self.object_list) # IDK how to calculate this tbh
+        # acceleration = [0]*len(self.object_list) 
 
         action_state = [] # order the options in order
 
@@ -247,7 +242,7 @@ class MotionPlan(Node):
             if opponent_linear_distances[nearest_opponet_index] > 20:
                 action_state.append('follow')
             else:
-                if relative_velocity < 0:
+                if relative_velocity <= 0:
                     if abs(self_X - self_leftwall_bound) > abs(self_rightwall_bound - self_X) :
                         action_state.append('left')
                     else:
@@ -258,11 +253,11 @@ class MotionPlan(Node):
                     action_state.append('follow')
 
             self.legacy_state = action_state
+            action_state.append('straight')
+        # print("Action State: ", action_state)
+        # print("Traj_Set", self.traj_set)
 
-        for sel_action in action_state:  # try to force 'right', else try next in list
-            if sel_action in self.traj_set.keys():
-                self.behavior = sel_action
-                break
+        self.action_state = action_state
         return
 
 

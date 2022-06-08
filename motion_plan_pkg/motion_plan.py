@@ -28,7 +28,7 @@ class MotionPlan(Node):
         # init dummy object list
         self.obj_list_dummy = graph_ltpl.testing_tools.src.objectlist_dummy.ObjectlistDummy(dynamic=False,vel_scale=0.3,s0=250.0)
         self.object_list = self.obj_list_dummy.get_objectlist()
-        print(self.object_list)
+        # self.object_list = [{'X': 75, 'Y': 103, 'theta': 0.0, 'type': 'physical', 'id': 1, 'length': 1.0, 'width': 1.0, 'v': 0.0}]
 
         # state variables
         self.traj_set = {'straight': None}
@@ -56,7 +56,7 @@ class MotionPlan(Node):
         # INITIALIZATION AND OFFLINE PART --------------------------------------------------------------------------------------
         # ----------------------------------------------------------------------------------------------------------------------
         
-        track_specifier = "berlin"
+        track_specifier = "ims"
         # define all relevant paths
         path_dict = {'globtraj_input_path': toppath + "/inputs/traj_ltpl_cl/traj_ltpl_cl_" + track_specifier + ".csv", #replace with path of wherever Team4 stores race line
                     'graph_store_path': toppath + "/inputs/stored_graph.pckl", #new path to store graph of offline graph (?)
@@ -86,6 +86,10 @@ class MotionPlan(Node):
         self.ltpl_obj.set_startpos(pos_est=self.pos_est,
                             heading_est=self.heading_est)
 
+        # self.traj_set = self.ltpl_obj.calc_vel_profile(pos_est=self.pos_est,
+        #                                         vel_est=self.vel_est)[0]
+
+
         self.tic = time.time()
 
         # self.zone_example = {'sample_zone': [[64, 64, 64, 64, 64, 64, 64, 65, 65, 65, 65, 65, 65, 65, 66, 66, 66, 66, 66, 66, 66], #blocked layers
@@ -106,10 +110,20 @@ class MotionPlan(Node):
         self.behavior_planning()
         self.calc_local_path()
         
+        
+        # for sel_action in action_state:
+        for sel_action in self.action_state:  # try to force 'right', else try next in list
+            if sel_action in self.traj_set.keys():
+                self.behavior = sel_action
+                break
+
         # Print what behavior is choosen
+        self.get_logger().info("Action State: {%s}" % (self.action_state))
         self.get_logger().info("Behavior: {%s}" % (self.behavior))
 
         self.pathMsg.header.frame_id = 'map'
+
+        self.get_logger().info("Trag Set: {%s}" % list(self.traj_set.keys()))
 
         for row in self.traj_set[self.behavior][0]:
             pose_msg = PoseStamped()
@@ -180,9 +194,9 @@ class MotionPlan(Node):
         opponent_count = 0
         nearest_opponet_index = 0
         orientation_angle = [0]*len(self.object_list)
-        opponent_relative_direction = [0]*len(self.object_list) # ahaed of behind or align
+        # opponent_relative_direction = [0]*len(self.object_list) # ahaed of behind or align
         opponent_linear_distances = [float('inf')]*len(self.object_list)
-        opponent_dimensions = [[0, 0]]*len(self.object_list)
+        # opponent_dimensions = [[0, 0]]*len(self.object_list)
         opponent_velocity = [0]*len(self.object_list)
 
         opponent_horizontal_distance = [0]*len(self.object_list)
@@ -228,7 +242,7 @@ class MotionPlan(Node):
             if opponent_linear_distances[nearest_opponet_index] > 20:
                 action_state.append('follow')
             else:
-                if relative_velocity < 0:
+                if relative_velocity <= 0:
                     if abs(self_X - self_leftwall_bound) > abs(self_rightwall_bound - self_X) :
                         action_state.append('left')
                     else:
@@ -239,13 +253,11 @@ class MotionPlan(Node):
                     action_state.append('follow')
 
             self.legacy_state = action_state
+            action_state.append('straight')
+        # print("Action State: ", action_state)
+        # print("Traj_Set", self.traj_set)
 
-        print("Action State: ", action_state)
-
-        for sel_action in action_state:  # try to force 'right', else try next in list
-            if sel_action in self.traj_set.keys():
-                self.behavior = sel_action
-                break
+        self.action_state = action_state
         return
 
 
