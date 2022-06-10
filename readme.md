@@ -35,20 +35,15 @@ The following output is achieved, in this case the &#39;follow&#39; behavior was
 
 INSTALLATION
 
-Any dependencies not already installed can be found in &quot;requirements.txt&quot; and installed in similar fashion as other python libraries. For example &quot;pip install [package name]&quot;
-
+Any dependencies not already installed can be found in “requirements.txt” and installed in similar fashion as other python libraries. For example “pip install [package name]” 
 This ROS package can be installed in the following way:
 
-First you should navigate to the source folder of your catkin\_ws or ros\_ws.
-
-For example: cd ~/ros\_ws/src.
-
+First you should navigate to the source folder of your catkin_ws or ros_ws. 
+For example: cd ~/ros_ws/src.
 Run:
 
-git clone [alexmak001/motion-path-planning-ros2 (github.com)](https://github.com/alexmak001/motion-path-planning-ros2)
-
+git clone alexmak001/motion-path-planning-ros2 (github.com)
 cd ..
-
 colcon build
 
 The motion planning package should be now installed to your computer and you will be able to use it after sourcing your workspace.
@@ -57,49 +52,30 @@ source /opt/ros/foxy/setup.bash
 
 You can run the motion planning package by running:
 
-ros2 launch motion\_plan\_pkg motion\_plan\_launch\_file.launch.py
+ros2 launch motion_plan_pkg motion_plan_launch_file.launch.py
 
 ROS API
-
 Subscribed Topics
 
-TrackedObjects(sensor\_msgs/tracked\_objects) - This would have been the custom sensor fusion topic we were going to subscribe to. For independent testing and usage purposes, our package uses dummy sensor data
+TrackedObjects(sensor_msgs/tracked_objects) - This would have been the custom sensor fusion topic we were going to subscribe to. For independent testing and usage purposes, our package uses dummy sensor data that provides a list of “obstacles” along our given race track.
+
+geometry_msgs/PoseStamped - This subscription gives us the current position of our car so we know what position to begin generating each local path from. 
 
 Published Topics
+This node publishes a list of roughly 100-120 x and y coordinates relative to our race line graph for the race control team to follow. 
 
-This node can publish a variety of topics but the final configuration depends on the user. By default the majority of the topics are disabled and they should be enabled through the launch file configuration.
-
-datmo/marker\_array (visualization\_msgs/MarkerArray) - In this topic a variety of Rviz markers are published, which can facilitate in understanding the inner workings of the program.
-
-datmo/box\_kf (datmo/TrackArray) - In this topic the output of a Kalman Filter with a Constant Velocity model, which tracks the center of the box that surrounds the clusters is published.\
-
-Note: In case that the marker\_array topic is published from a robot and visualized in computer, which has a different version of ROS installed (kinetic, melodic, ...), the msgs will not be published and the datmo node will crash with an md5sum error. To mitigate this, you should install on your robot the visualization msgs package of the ROS installation that runs on your computer.
+nav_msgs/Path - In this topic a path is published for the race control team to use to make our car move in the correct directions. 
 
 Custom Messages
-
-This package uses two custom msgs types datmo/Track and datmo/TrackArray to facilitate the publishing of its results. To my knowledge, at the time of developement, there was no standard ROS messages that accomplishes the same task.
-
-The datmo/Track message has the following structure:
-
-int32 id - object ID, so it is possible to differentiate between different objects during tracking
-
-float32 length - Estimated length of the object
-
-float32 width Estimated width of the object
-
-nav\_msgs/Odometry odom - Estimated pose of the object
-
-The datmo/TrackArray message is an array that contains multiple datmo/Track messages, with the goal of efficient publishing.
+Originally, a custom message interface was created for the race control team to subscribe to and receive path updates; however, due to integration issues, simulation issues, and lack of time, we ultimately did not use the custom interface and went with the nav_msgs/Path pre-built message to output our paths.
 
 Rviz markers
+When opening Rviz, add a new topic, select Path and subscribe it to motion_plan.
 
-In case that the pub\_markers flag is set to true, this package publishes visualization messages, which can be displayed in Rviz. The following messages are published:
+In case that the pub_markers flag is set to true, this package publishes visualization messages, which can be displayed in Rviz. The following messages are published:
 
-closest\_corner - The closest corner point of surrounding vehicles is visualized with a black rectangle.
+green line - The path should be continually updating and continually trace sections of your imported race line.
 
-bounding\_box\_center - The center of the bounding box is visualized with a yellow rectangle.
-
-velocities - The velocities of the tracked objects are represented with an arrow.\
 
 PARAMETERS
 
