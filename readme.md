@@ -33,7 +33,7 @@ The following output is achieved, in this case the &#39;follow&#39; behavior was
 
 ![](docs/package_framework.png)
 
-INSTALLATION
+## Installation
 
 Any dependencies not already installed can be found in “requirements.txt” and installed in similar fashion as other python libraries. For example “pip install [package name]” 
 This ROS package can be installed in the following way:
@@ -54,22 +54,23 @@ You can run the motion planning package by running:
 
 ros2 launch motion_plan_pkg motion_plan_launch_file.launch.py
 
-ROS API
-Subscribed Topics
+## ROS API
+
+### Subscribed Topics
 
 TrackedObjects(sensor_msgs/tracked_objects) - This would have been the custom sensor fusion topic we were going to subscribe to. For independent testing and usage purposes, our package uses dummy sensor data that provides a list of “obstacles” along our given race track.
 
 geometry_msgs/PoseStamped - This subscription gives us the current position of our car so we know what position to begin generating each local path from. 
 
-Published Topics
+### Published Topics
 This node publishes a list of roughly 100-120 x and y coordinates relative to our race line graph for the race control team to follow. 
 
 nav_msgs/Path - In this topic a path is published for the race control team to use to make our car move in the correct directions. 
 
-Custom Messages
+### Custom Messages
 Originally, a custom message interface was created for the race control team to subscribe to and receive path updates; however, due to integration issues, simulation issues, and lack of time, we ultimately did not use the custom interface and went with the nav_msgs/Path pre-built message to output our paths.
 
-Rviz markers
+### Rviz markers
 When opening Rviz, add a new topic, select Path and subscribe it to motion_plan.
 
 In case that the pub_markers flag is set to true, this package publishes visualization messages, which can be displayed in Rviz. The following messages are published:
@@ -77,19 +78,7 @@ In case that the pub_markers flag is set to true, this package publishes visuali
 green line - The path should be continually updating and continually trace sections of your imported race line.
 
 
-PARAMETERS
-
-&quot;lidar\_frame&quot; (&quot;string&quot;, default: &quot;laser&quot;) - Name of the transformation frame (frame\_id) of the LaserScan msgs
-
-&quot;world\_frame&quot; (&quot;string&quot;, default: &quot;world&quot;) - Name of the world coordinate frame, if it is not available, this value can be set equal to the lidar\_frame
-
-&quot;threshold\_distance&quot; (&quot;double&quot;, default: &quot;0.2&quot;) - This value sets the distance that is used by the clustering algorithm
-
-&quot;euclidean\_distance&quot; (&quot;double&quot;, default: &quot;0.25&quot;) - This value sets the distance that is used by the euclidean distasnce data association algorithm
-
-&quot;pub\_markers&quot; (&quot;bool&quot;, default: &quot;false&quot;) - publish of the the vizualization markers
-
-CHALLENGES FACED
+## Challenges faced
 
 One of the major challenges that we faced as a group was communication. It was sometimes a difficult task to share what you worked on or what you were able to accomplish with other team members and teams. We were sometimes only able to truly share information when we met in person, because remote meetings were not as effective. Also many people had to miss class due to COVID and made working in a group slightly more of a challenge, but was not a major issue.
 
@@ -99,7 +88,7 @@ The most crucial part of this project was the selection of which algorithm we we
 
 The last major challenge we faced was not having a great way to test until the very last week of the project. Throughout the implementation, we could only debug with print statements to see that there is information flowing, but we did not know if it was correct. When we finally set up the simulation in the lab, we were able to visualize our outputs, but they were not the correct ones. Also, we found out that the sample data we had been using for our algorithm was not reflective of what we will be receiving during the race, so we had to figure out how to quickly format them.
 
-Development
+## Development Timeline
 
   - Week 6
     - Began exploring possible options for motion plan algorithms.
