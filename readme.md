@@ -19,7 +19,7 @@ The aim of the package is to return the fastest and most efficient path to overt
 - Form: basic shape of the object
 - v\_x : velocity
 
-![](RackMultipart20220610-1-ov6p19_html_dabcc1ebd67b7398.png)
+![](docs/sensor_fusion.png)
 
 Behavior - Behavior is the state of action that a car is currently in or would like to take. There are 4 different types of behavior executable by our package: Left, Right, Straight and Follow. It is calculated using the relative positions and relative velocity of opponent cars.
 
@@ -29,9 +29,9 @@ Using the behavior selection algorithm, a behavior is selected. A trajector\_set
 
 The following output is achieved, in this case the &#39;follow&#39; behavior was chosen from the trajectory set :
 
-![](sensor_fusion.png)
+![](docs/output.png)
 
-![](RackMultipart20220610-1-ov6p19_html_a0b5e941f99bf693.png)
+![](docs/package_framework.png)
 
 INSTALLATION
 
