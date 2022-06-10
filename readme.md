@@ -23,7 +23,7 @@ Opponent Detection - Other race cars on the track are detected by fusing LiDAR d
 
 Behavior - Behavior is the state of action that a car is currently in or would like to take. There are 4 different types of behavior executable by our package: Left, Right, Straight and Follow. It is calculated using the relative positions and relative velocity of opponent cars.
 
-Output
+### Output
 
 Using the behavior selection algorithm, a behavior is selected. A trajector\_set with keys corresponding to action and values corresponding to trajectories is returned. The optimal behavior is selected from the trajectory\_set and published.
 
