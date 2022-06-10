@@ -50,11 +50,15 @@ colcon build
 
 The motion planning package should be now installed to your computer and you will be able to use it after sourcing your workspace.
 
+````
 source /opt/ros/foxy/setup.bash
+````
 
 You can run the motion planning package by running:
 
+````
 ros2 launch motion_plan_pkg motion_plan_launch_file.launch.py
+````
 
 ## ROS API
 
