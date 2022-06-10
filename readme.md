@@ -42,9 +42,11 @@ First you should navigate to the source folder of your catkin_ws or ros_ws.
 For example: cd ~/ros_ws/src.
 Run:
 
+````
 git clone alexmak001/motion-path-planning-ros2 (github.com)
 cd ..
 colcon build
+````
 
 The motion planning package should be now installed to your computer and you will be able to use it after sourcing your workspace.
 
