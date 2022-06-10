@@ -1,4 +1,4 @@
-# Online Path Planning for DSC 190 SP22
+# Motion Planning for DSC 190 SP22
 
 ## Summary
 
