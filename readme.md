@@ -29,7 +29,7 @@ Using the behavior selection algorithm, a behavior is selected. A trajector\_set
 
 The following output is achieved, in this case the &#39;follow&#39; behavior was chosen from the trajectory set :
 
-![](Screenshot 2022-06-10 at 12.38.18 PM.png)
+![](sensor_fusion.png)
 
 ![](RackMultipart20220610-1-ov6p19_html_a0b5e941f99bf693.png)
 
