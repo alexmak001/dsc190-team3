@@ -1,4 +1,6 @@
-## SUMMARY
+# Online Path Planning for DSC 190 SP22
+
+## Summary
 
 The aim of the package is to return the fastest and most efficient path to overtake objects ahead safely and follow the optimal global raceline. This package was developed for the Winter 2022 edition of the DSC 190 (Intro to Robot Perception &amp; Navigation) class at UC San Diego. The package runs on python3 and is tested on a simulation of the 2.5 mile long Indiana Motor Speedway.
 
